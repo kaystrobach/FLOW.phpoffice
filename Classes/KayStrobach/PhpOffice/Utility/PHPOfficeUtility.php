@@ -16,8 +16,8 @@ class PHPOfficeUtility {
 	 * @throws \Exception
 	 */
 	public function init($library = NULL) {
-		$path         = __DIR__ . '/../../../../Resources/Private/PHP/' . $library . '/Classes/' . $library . '.php';
-		$fallbackPath = __DIR__ . '/../../../../Resources/Private/PHP/' . $library . '/src/' . $library . '.php';
+		$path         = FLOW_PATH_PACKAGES . 'Libraries/kaystrobach/phpoffice/Resources/Private/PHP/' . $library . '/Classes/' . $library . '.php';
+		$fallbackPath = FLOW_PATH_PACKAGES . 'Libraries/kaystrobach/phpoffice/Resources/Private/PHP/' . $library . '/src/' . $library . '.php';
 		if(!in_array($library, $this->initialized)) {
 			if(file_exists($path)) {
 				include_once($path);
