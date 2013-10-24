@@ -13,7 +13,7 @@ class PHPOfficeUtility {
 	 *
 	 * @param null $library
 	 * @return null
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function init($library = NULL) {
 		$path         = __DIR__ . '/../../../../Resources/Private/PHP/' . $library . '/Classes/' . $library . '.php';
@@ -30,7 +30,7 @@ class PHPOfficeUtility {
 					return new $library();
 				}
 			} else {
-				throw new Exception('Can´t find library "' . $library . '" in "' . $path . '"');
+				throw new \Exception('Can´t find library "' . $library . '" in "' . $path . '"');
 			}
 		}
 		return NULL;
