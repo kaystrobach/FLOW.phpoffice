@@ -18,16 +18,17 @@ class PHPOfficeUtility {
 	public function init($library = NULL) {
 		$path         = FLOW_PATH_PACKAGES . 'Libraries/kaystrobach/phpoffice/Resources/Private/PHP/' . $library . '/Classes/' . $library . '.php';
 		$fallbackPath = FLOW_PATH_PACKAGES . 'Libraries/kaystrobach/phpoffice/Resources/Private/PHP/' . $library . '/src/' . $library . '.php';
+		$classname    = '\\' . $library;
 		if(!in_array($library, $this->initialized)) {
 			if(file_exists($path)) {
 				include_once($path);
-				if(class_exists($library)) {
-					return new $library();
+				if(class_exists($classname)) {
+					return new $classname();
 				}
 			} elseif(file_exists($fallbackPath)) {
 				include_once($fallbackPath);
-				if(class_exists($library)) {
-					return new $library();
+				if(class_exists($classname)) {
+					return new $classname();
 				}
 			} else {
 				throw new \Exception('Can´t find library "' . $library . '" in "' . $path . '"');
