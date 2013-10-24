@@ -2,7 +2,7 @@
 
 namespace KayStrobach\PhpOffice\Utility;
 
-class PHPOfficeUtility implements t3lib_Singleton{
+class PHPOfficeUtility {
 	/**
 	 * contains the already initilized libaries
 	 */
