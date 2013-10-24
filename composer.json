@@ -1,2 +1,14 @@
-FLOW.phpoffice
-==============
+{
+	"name":"kaystrobach/phpoffice",
+	"type":"library",
+	"description":null,
+	"version":null,
+	"require":{
+		"typo3/flow":"*"
+	},
+	"autoload":{
+		"psr-0":{
+			"KayStrobach\\PhpOffice":"Classes"
+		}
+	}
+}
