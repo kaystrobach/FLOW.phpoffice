@@ -5,7 +5,7 @@
 	"version":null,
 	"require":{
 		"typo3/flow":"*",
-		"phpoffice/phpexcel": "dev-develop"
+		"phpoffice/phpexcel": "1.7.9"
 	},
 	"autoload":{
 		"psr-0":{
