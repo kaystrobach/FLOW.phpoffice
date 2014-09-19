@@ -1,6 +1,6 @@
 {
 	"name":"kaystrobach/phpoffice",
-	"type":"library",
+	"type":"typo3-flow-package",
 	"description":null,
 	"version":null,
 	"require":{
