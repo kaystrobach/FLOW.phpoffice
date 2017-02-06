@@ -2,8 +2,8 @@
 
 namespace KayStrobach\PhpOffice\View;
 
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Mvc\Exception\StopActionException;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\Exception\StopActionException;
 
 /**
  * Class AbstractExcelView
@@ -12,7 +12,7 @@ use TYPO3\Flow\Mvc\Exception\StopActionException;
  *
  * @package SBS\LaPo\View
  */
-class AbstractExcelView extends \TYPO3\Flow\Mvc\View\AbstractView
+class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
 {
     /**
      * define allowed view options
@@ -26,7 +26,7 @@ class AbstractExcelView extends \TYPO3\Flow\Mvc\View\AbstractView
 
     /**
      * @Flow\Inject
-     * @var \TYPO3\Flow\Persistence\PersistenceManagerInterface
+     * @var \Neos\Flow\Persistence\PersistenceManagerInterface
      */
     protected $persistenceManager;
 
@@ -57,7 +57,7 @@ class AbstractExcelView extends \TYPO3\Flow\Mvc\View\AbstractView
 
     /**
      * @Flow\Inject
-     * @var \TYPO3\Flow\Utility\Environment
+     * @var \Neos\Flow\Utility\Environment
      */
     protected $environment;
 
