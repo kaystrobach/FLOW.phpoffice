@@ -2,29 +2,27 @@
 
 namespace KayStrobach\PhpOffice\View;
 
-use Neos\Flow\Annotations as Flow;
-
 /**
- * Class StudentExcelView
+ * Class AbstractExcelView
  *
- * Basiert auf http://www.networkteam.com/blog/post/verwendung-von-custom-views-in-flow.html
- *
- * @package SBS\LaPo\View
+ * Based on http://www.networkteam.com/blog/post/verwendung-von-custom-views-in-flow.html
  */
 class ArrayExcelView extends AbstractExcelView
 {
     /**
      * Renders the view
      *
-     * @return string The rendered view
+     * @param \PHPExcel $excelFileObject
+     * @param int $firstRow
+     * @return array The rendered array values
      * @api
      */
-    public function renderValues(\PHPExcel $excelFileObject, $firstRow)
+    public function renderValues(\PHPExcel $excelFileObject, int $firstRow): array
     {
         $values = array();
         /** @var array $line */
         foreach ($this->variables['values'] as $line) {
-            if (is_array($line)) {
+            if (\is_array($line)) {
                 $lineValues = array();
                 foreach($line as $cell) {
                     $lineValues[] = $this->valueToString($cell);
@@ -45,15 +43,17 @@ class ArrayExcelView extends AbstractExcelView
      * @param $value
      * @return string
      */
-    protected function valueToString($value) {
-        if (is_string($value)) {
+    protected function valueToString($value): string
+    {
+        if (\is_string($value)) {
             return $value;
-        } elseif (is_integer($value)) {
-            return (string) $value;
-        } elseif (is_float($value)) {
-            return (string) $value;
-        } else {
-            return gettype($value) . ' - can´t be casted to string';
         }
+        if (\is_int($value)) {
+            return (string) $value;
+        }
+        if (\is_float($value)) {
+            return (string) $value;
+        }
+        return \gettype($value) . ' - can´t be casted to string';
     }
 }
