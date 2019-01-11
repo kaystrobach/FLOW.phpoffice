@@ -9,7 +9,7 @@
     },
     "autoload": {
         "psr-4": {
-            "KayStrobach\\PhpOffice": "Classes"
+            "KayStrobach\\PhpOffice\\": "Classes"
         }
     },
     "extra": {
