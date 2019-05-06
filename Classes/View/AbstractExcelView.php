@@ -4,13 +4,15 @@ namespace KayStrobach\PhpOffice\View;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Mvc\Exception\StopActionException;
+use Neos\Flow\Mvc\View\AbstractView;
+use PhpOffice\PhpSpreadsheet as Spreadsheet;
 
 /**
  * Class AbstractExcelView
  *
  * Based on http://www.networkteam.com/blog/post/verwendung-von-custom-views-in-flow.html
  */
-class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
+class AbstractExcelView extends AbstractView
 {
     /**
      * define allowed view options
@@ -29,9 +31,10 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
     protected $persistenceManager;
 
     /**
-     * @var null
+     * name of template file
+     * @var string
      */
-    protected $excelTemplate = null;
+    protected $excelTemplate;
 
     /**
      * @var string
@@ -66,6 +69,11 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
     protected $environment;
 
     /**
+     * @var Spreadsheet\Spreadsheet
+     */
+    protected $spreadsheet;
+
+    /**
      * @param string or resource $path
      */
     public function setTemplatePath($path)
@@ -80,7 +88,7 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
      * @return string The rendered view
      * @api
      */
-    public function render()
+    public function render(): string
     {
         /**
          * wird aus dem Paket Packages/Libraries/kaystrobach/phpoffice geladen
@@ -88,24 +96,21 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
          * @var \PHPExcel $PHPExcel
          */
 
-        $loader = new \KayStrobach\PhpOffice\Utility\PHPOfficeUtility();
-        $loader->init('PHPExcel');
-        $validLocale = \PHPExcel_Settings::setLocale($this->locale);
-
+        $validLocale = Spreadsheet\Settings::setLocale($this->locale);
         if (!$validLocale) {
             throw new \Exception('No valid locale set');
         }
 
         $tempFileName = $this->createTempFileFromTemplate();
-        $excelFileObject = $this->resetTemplate($tempFileName);
+        $this->spreadsheet = $this->resetTemplate($tempFileName);
 
-        $this->renderValuesIntoTemplate($excelFileObject);
+        $this->renderValuesIntoTemplate();
 
         header('Content-type: application/ms-excel');
         header('Content-Disposition: attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.xlsx"');
         header('Cache-Control: max-age=0');
 
-        $objWriter = \PHPExcel_IOFactory::createWriter($excelFileObject, $this->writer);
+        $objWriter = Spreadsheet\IOFactory::createWriter($this->spreadsheet, $this->writer);
         ob_start();
         $objWriter->save('php://output');
         echo ob_get_clean();
@@ -120,24 +125,22 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
         return $tempFileName;
     }
 
-    protected function resetTemplate($file): \PHPExcel
+    protected function resetTemplate($file): Spreadsheet\Spreadsheet
     {
-        $excelFileObject = \PHPExcel_IOFactory::load($file);
+        $excelFileObject = Spreadsheet\IOFactory::load($file);
         $excelFileObject->setActiveSheetIndex(0);
         return $excelFileObject;
     }
 
     /**
-     * @param \PHPExcel $excelFileObject
-     * @throws \InvalidArgumentException
-     * @throws \PHPExcel_Exception
+     * @throws Spreadsheet\Exception
      */
-    protected function renderValuesIntoTemplate(\PHPExcel $excelFileObject): void
+    protected function renderValuesIntoTemplate()
     {
-        $values = $this->renderValues($excelFileObject, $this->firstRow);
+        $values = $this->renderValues($this->spreadsheet, $this->firstRow);
         $rowNumber = $this->firstRow;
         foreach ($values as $row) {
-            $activeSheet = $excelFileObject->getActiveSheet();
+            $activeSheet = $this->spreadsheet->getActiveSheet();
             /** autoheight of cell to avoid cutting content visibility */
             $activeSheet->getRowDimension($rowNumber)->setRowHeight(-1);
             if (\is_array($row)) {
@@ -158,11 +161,10 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
     }
 
     /**
-     * @param \PHPExcel $excelFileObject
      * @param int $firstRow
      * @return array
      */
-    public function renderValues(\PHPExcel $excelFileObject, int $firstRow): array
+    public function renderValues(int $firstRow): array
     {
         return array();
     }
