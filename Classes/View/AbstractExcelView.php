@@ -20,6 +20,8 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
         'templateRootPaths' => array(null, 'Path(s) to the template root. If NULL, then $this->options["templateRootPathPattern"] will be used to determine the path', 'array'),
         'partialRootPaths' => array(null, 'Path(s) to the partial root. If NULL, then $this->options["partialRootPathPattern"] will be used to determine the path', 'array'),
         'layoutRootPaths' => array(null, 'Path(s) to the layout root. If NULL, then $this->options["layoutRootPathPattern"] will be used to determine the path', 'array'),
+        'writer' => array('Excel2007', 'Defines which writer should be used', 'string'),
+        'fileExtension' => array('xlsx', 'file extension for download', 'string'),
     );
 
     /**
@@ -102,10 +104,10 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
         $this->renderValuesIntoTemplate($excelFileObject);
 
         header('Content-type: application/ms-excel');
-        header('Content-Disposition: attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.xlsx"');
+        header('Content-Disposition: attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.' . $this->getOption('fileExtension') . '"');
         header('Cache-Control: max-age=0');
 
-        $objWriter = \PHPExcel_IOFactory::createWriter($excelFileObject, $this->writer);
+        $objWriter = \PHPExcel_IOFactory::createWriter($excelFileObject, $this->getOption('writer'));
         ob_start();
         $objWriter->save('php://output');
         echo ob_get_clean();
