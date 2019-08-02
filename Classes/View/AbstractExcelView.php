@@ -110,9 +110,7 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
         $objWriter = \PHPExcel_IOFactory::createWriter($excelFileObject, $this->getOption('writer'));
         ob_start();
         $objWriter->save('php://output');
-        echo ob_get_clean();
-        throw new StopActionException('Excel file send');
-
+        return ob_get_clean();
     }
 
     protected function createTempFileFromTemplate(): string
