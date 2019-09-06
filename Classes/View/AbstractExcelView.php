@@ -111,8 +111,7 @@ class AbstractExcelView extends \Neos\Flow\Mvc\View\AbstractView
         $this->configureWriter($objWriter);
         ob_start();
         $objWriter->save('php://output');
-        echo ob_get_clean();
-        throw new StopActionException('Excel file send');
+        return ob_get_clean();
 
     }
 
