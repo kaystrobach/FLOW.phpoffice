@@ -1,5 +1,7 @@
 # FLOW.phpoffice
 
+**Attention, there was a an semver violation in the swith from version 1.0.x to 1.1.x**
+
 ## Init PHPExcel
 
 ```
