@@ -22,6 +22,8 @@ class AbstractExcelView extends AbstractView
         'templateRootPaths' => array(null, 'Path(s) to the template root. If NULL, then $this->options["templateRootPathPattern"] will be used to determine the path', 'array'),
         'partialRootPaths' => array(null, 'Path(s) to the partial root. If NULL, then $this->options["partialRootPathPattern"] will be used to determine the path', 'array'),
         'layoutRootPaths' => array(null, 'Path(s) to the layout root. If NULL, then $this->options["layoutRootPathPattern"] will be used to determine the path', 'array'),
+        'writer' => array('Excel2007', 'Defines which writer should be used', 'string'),
+        'fileExtension' => array('xlsx', 'file extension for download', 'string'),
     );
 
     /**
@@ -107,15 +109,14 @@ class AbstractExcelView extends AbstractView
         $this->renderValuesIntoTemplate();
 
         header('Content-type: application/ms-excel');
-        header('Content-Disposition: attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.xlsx"');
+        header('Content-Disposition: attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.' . $this->getOption('fileExtension') . '"');
         header('Cache-Control: max-age=0');
 
-        $objWriter = Spreadsheet\IOFactory::createWriter($this->spreadsheet, $this->writer);
+        $objWriter = \PHPExcel_IOFactory::createWriter($excelFileObject, $this->getOption('writer'));
+        $this->configureWriter($objWriter);
         ob_start();
         $objWriter->save('php://output');
-        echo ob_get_clean();
-        throw new StopActionException('Excel file send');
-
+        return ob_get_clean();
     }
 
     protected function createTempFileFromTemplate(): string
@@ -177,5 +178,10 @@ class AbstractExcelView extends AbstractView
     {
         $date = new \DateTime('now');
         return $date->format('d.m.Y-H_i_s');
+    }
+    
+    protected function configureWriter(\PHPExcel_Writer_IWriter $writer)
+    {
+        return $writer;
     }
 }
