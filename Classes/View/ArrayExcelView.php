@@ -12,12 +12,11 @@ class ArrayExcelView extends AbstractExcelView
     /**
      * Renders the view
      *
-     * @param \PHPExcel $excelFileObject
      * @param int $firstRow
      * @return array The rendered array values
      * @api
      */
-    public function renderValues(\PHPExcel $excelFileObject, int $firstRow): array
+    public function renderValues(int $firstRow): array
     {
         $values = array();
         /** @var array $line */
