@@ -22,7 +22,7 @@ class AbstractExcelView extends AbstractView
         'templateRootPaths' => array(null, 'Path(s) to the template root. If NULL, then $this->options["templateRootPathPattern"] will be used to determine the path', 'array'),
         'partialRootPaths' => array(null, 'Path(s) to the partial root. If NULL, then $this->options["partialRootPathPattern"] will be used to determine the path', 'array'),
         'layoutRootPaths' => array(null, 'Path(s) to the layout root. If NULL, then $this->options["layoutRootPathPattern"] will be used to determine the path', 'array'),
-        'writer' => array('Excel2007', 'Defines which writer should be used', 'string'),
+        'writer' => array('Xlsx', 'Defines which writer should be used', 'string'),
         'fileExtension' => array('xlsx', 'file extension for download', 'string'),
     );
 
@@ -47,7 +47,7 @@ class AbstractExcelView extends AbstractView
      * PHP Excel Writer name
      * @var string
      */
-    protected $writer = 'Excel2007';
+    protected $writer = 'Xlsx';
 
     /**
      * @var string
@@ -107,12 +107,13 @@ class AbstractExcelView extends AbstractView
         $this->spreadsheet = $this->resetTemplate($tempFileName);
 
         $this->renderValuesIntoTemplate();
+        $excelFileObject = $this->resetTemplate($tempFileName);
 
         header('Content-type: application/ms-excel');
         header('Content-Disposition: attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.' . $this->getOption('fileExtension') . '"');
         header('Cache-Control: max-age=0');
 
-        $objWriter = \PHPExcel_IOFactory::createWriter($this->spreadsheet, $this->getOption('writer'));
+        $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelFileObject, $this->getOption('writer'));
         $this->configureWriter($objWriter);
         ob_start();
         $objWriter->save('php://output');
@@ -179,8 +180,8 @@ class AbstractExcelView extends AbstractView
         $date = new \DateTime('now');
         return $date->format('d.m.Y-H_i_s');
     }
-    
-    protected function configureWriter(\PHPExcel_Writer_IWriter $writer)
+
+    protected function configureWriter(Spreadsheet\Writer\IWriter $writer)
     {
         return $writer;
     }
