@@ -138,7 +138,7 @@ class AbstractExcelView extends AbstractView
      */
     protected function renderValuesIntoTemplate()
     {
-        $values = $this->renderValues($this->spreadsheet, $this->firstRow);
+        $values = $this->renderValues($this->firstRow);
         $rowNumber = $this->firstRow;
         foreach ($values as $row) {
             $activeSheet = $this->spreadsheet->getActiveSheet();
