@@ -113,7 +113,7 @@ class AbstractExcelView extends AbstractView
         header('Content-Disposition: attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.' . $this->getOption('fileExtension') . '"');
         header('Cache-Control: max-age=0');
 
-        $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($excelFileObject, $this->getOption('writer'));
+        $objWriter = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($this->spreadsheet, $this->getOption('writer'));
         $this->configureWriter($objWriter);
         ob_start();
         $objWriter->save('php://output');
