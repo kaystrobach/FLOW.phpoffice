@@ -2,6 +2,8 @@
 
 namespace KayStrobach\PhpOffice\View;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+
 /**
  * Class AbstractExcelView
  *
@@ -12,11 +14,12 @@ class ArrayExcelView extends AbstractExcelView
     /**
      * Renders the view
      *
+     * @param \PhpOffice\PhpSpreadsheet\Spreadsheet $sheet $sheet
      * @param int $firstRow
      * @return array The rendered array values
      * @api
      */
-    public function renderValues(int $firstRow): array
+    public function renderValues(\PhpOffice\PhpSpreadsheet\Spreadsheet $sheet, int $firstRow): array
     {
         $values = array();
         /** @var array $line */

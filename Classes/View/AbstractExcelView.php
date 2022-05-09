@@ -3,9 +3,17 @@
 namespace KayStrobach\PhpOffice\View;
 
 use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Component\SetHeaderComponent;
 use Neos\Flow\Mvc\Exception\StopActionException;
 use Neos\Flow\Mvc\View\AbstractView;
-use PhpOffice\PhpSpreadsheet as Spreadsheet;
+use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Neos\Flow\Utility\Environment;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Settings;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\IWriter;
+use PhpOffice\PhpSpreadsheet\Exception;
 
 /**
  * Class AbstractExcelView
@@ -22,13 +30,13 @@ class AbstractExcelView extends AbstractView
         'templateRootPaths' => array(null, 'Path(s) to the template root. If NULL, then $this->options["templateRootPathPattern"] will be used to determine the path', 'array'),
         'partialRootPaths' => array(null, 'Path(s) to the partial root. If NULL, then $this->options["partialRootPathPattern"] will be used to determine the path', 'array'),
         'layoutRootPaths' => array(null, 'Path(s) to the layout root. If NULL, then $this->options["layoutRootPathPattern"] will be used to determine the path', 'array'),
-        'writer' => array('Excel2007', 'Defines which writer should be used', 'string'),
+        'writer' => array('Xlsx', 'Defines which writer should be used', 'string'),
         'fileExtension' => array('xlsx', 'file extension for download', 'string'),
     );
 
     /**
      * @Flow\Inject
-     * @var \Neos\Flow\Persistence\PersistenceManagerInterface
+     * @var PersistenceManagerInterface
      */
     protected $persistenceManager;
 
@@ -47,7 +55,7 @@ class AbstractExcelView extends AbstractView
      * PHP Excel Writer name
      * @var string
      */
-    protected $writer = 'Excel2007';
+    protected $writer = 'Xlsx';
 
     /**
      * @var string
@@ -66,12 +74,12 @@ class AbstractExcelView extends AbstractView
 
     /**
      * @Flow\Inject
-     * @var \Neos\Flow\Utility\Environment
+     * @var Environment
      */
     protected $environment;
 
     /**
-     * @var Spreadsheet\Spreadsheet
+     * @var Spreadsheet
      */
     protected $spreadsheet;
 
@@ -92,13 +100,7 @@ class AbstractExcelView extends AbstractView
      */
     public function render(): string
     {
-        /**
-         * wird aus dem Paket Packages/Libraries/kaystrobach/phpoffice geladen
-         *
-         * @var \PHPExcel $PHPExcel
-         */
-
-        $validLocale = Spreadsheet\Settings::setLocale($this->locale);
+        $validLocale = Settings::setLocale($this->locale);
         if (!$validLocale) {
             throw new \Exception('No valid locale set');
         }
@@ -108,12 +110,20 @@ class AbstractExcelView extends AbstractView
 
         $this->renderValuesIntoTemplate();
 
-        header('Content-type: application/ms-excel');
-        header('Content-Disposition: attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.' . $this->getOption('fileExtension') . '"');
-        header('Cache-Control: max-age=0');
+        $response = $this->controllerContext->getResponse();
+        $response->setContentType('application/ms-excel');
+        $response->setComponentParameter(
+            SetHeaderComponent::class,
+            'Content-Disposition',
+            'attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.' . $this->getOption('fileExtension') . '"'
+        );
+        $response->setComponentParameter(
+            SetHeaderComponent::class,
+            'Cache-Control',
+            'max-age=0'
+        );
 
-        $objWriter = \PHPExcel_IOFactory::createWriter($this->spreadsheet, $this->getOption('writer'));
-        $this->configureWriter($objWriter);
+        $objWriter = IOFactory::createWriter($this->spreadsheet, $this->getOption('writer'));
         ob_start();
         $objWriter->save('php://output');
         return ob_get_clean();
@@ -126,15 +136,15 @@ class AbstractExcelView extends AbstractView
         return $tempFileName;
     }
 
-    protected function resetTemplate($file): Spreadsheet\Spreadsheet
+    protected function resetTemplate($file): Spreadsheet
     {
-        $excelFileObject = Spreadsheet\IOFactory::load($file);
+        $excelFileObject = IOFactory::load($file);
         $excelFileObject->setActiveSheetIndex(0);
         return $excelFileObject;
     }
 
     /**
-     * @throws Spreadsheet\Exception
+     * @throws Exception
      */
     protected function renderValuesIntoTemplate()
     {
@@ -148,7 +158,7 @@ class AbstractExcelView extends AbstractView
                 $columnNumber = 0;
                 foreach ($row as $value) {
                     if (\array_key_exists($columnNumber, $this->columnTypes)) {
-                        $activeSheet->setCellValueExplicitByColumnAndRow($columnNumber, $rowNumber, $value, \PHPExcel_Cell_DataType::TYPE_STRING);
+                        $activeSheet->setCellValueExplicitByColumnAndRow($columnNumber, $rowNumber, $value, DataType::TYPE_STRING);
                     } else {
                         $activeSheet->setCellValueByColumnAndRow($columnNumber, $rowNumber, $value);
                     }
@@ -162,10 +172,11 @@ class AbstractExcelView extends AbstractView
     }
 
     /**
+     * @param Spreadsheet $sheet
      * @param int $firstRow
      * @return array
      */
-    public function renderValues(int $firstRow): array
+    public function renderValues(Spreadsheet $sheet, int $firstRow): array
     {
         return array();
     }
@@ -179,8 +190,8 @@ class AbstractExcelView extends AbstractView
         $date = new \DateTime('now');
         return $date->format('d.m.Y-H_i_s');
     }
-    
-    protected function configureWriter(\PHPExcel_Writer_IWriter $writer)
+
+    protected function configureWriter(IWriter $writer): IWriter
     {
         return $writer;
     }
