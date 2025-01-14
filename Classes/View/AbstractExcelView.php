@@ -8,6 +8,7 @@ use Neos\Flow\Mvc\Exception\StopActionException;
 use Neos\Flow\Mvc\View\AbstractView;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
 use Neos\Flow\Utility\Environment;
+use PhpOffice\PhpSpreadsheet\Cell\CellAddress;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Settings;
@@ -150,17 +151,19 @@ class AbstractExcelView extends AbstractView
     {
         $values = $this->renderValues($this->spreadsheet, $this->firstRow);
         $rowNumber = $this->firstRow;
+        $activeSheet = $this->spreadsheet->getActiveSheet();
         foreach ($values as $row) {
-            $activeSheet = $this->spreadsheet->getActiveSheet();
             /** autoheight of cell to avoid cutting content visibility */
             $activeSheet->getRowDimension($rowNumber)->setRowHeight(-1);
             if (\is_array($row)) {
                 $columnNumber = 1; // as the next called functions are now converted to A1 etc. we have to start with 1
                 foreach ($row as $value) {
+                    $cell = $activeSheet->getCell([$columnNumber, $rowNumber]);
                     if (\array_key_exists($columnNumber, $this->columnTypes)) {
-                        $activeSheet->setCellValueExplicitByColumnAndRow($columnNumber, $rowNumber, $value, DataType::TYPE_STRING);
+                        $cell->setDataType($this->columnTypes[$columnNumber]);
+                        $cell->setValue($value);
                     } else {
-                        $activeSheet->setCellValueByColumnAndRow($columnNumber, $rowNumber, $value);
+                        $cell->setValue($value);
                     }
                     $columnNumber++;
                 }
