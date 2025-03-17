@@ -28,11 +28,12 @@ class AbstractExcelView extends AbstractView
      * @var array
      */
     protected $supportedOptions = array(
-        'templateRootPaths' => array(null, 'Path(s) to the template root. If NULL, then $this->options["templateRootPathPattern"] will be used to determine the path', 'array'),
-        'partialRootPaths' => array(null, 'Path(s) to the partial root. If NULL, then $this->options["partialRootPathPattern"] will be used to determine the path', 'array'),
-        'layoutRootPaths' => array(null, 'Path(s) to the layout root. If NULL, then $this->options["layoutRootPathPattern"] will be used to determine the path', 'array'),
-        'writer' => array('Xlsx', 'Defines which writer should be used', 'string'),
-        'fileExtension' => array('xlsx', 'file extension for download', 'string'),
+        'templateRootPaths' => [null, 'Path(s) to the template root. If NULL, then $this->options["templateRootPathPattern"] will be used to determine the path', 'array'],
+        'partialRootPaths' => [null, 'Path(s) to the partial root. If NULL, then $this->options["partialRootPathPattern"] will be used to determine the path', 'array'],
+        'layoutRootPaths' => [null, 'Path(s) to the layout root. If NULL, then $this->options["layoutRootPathPattern"] will be used to determine the path', 'array'],
+        'writer' => ['Xlsx', 'Defines which writer should be used', 'string'],
+        'fileExtension' => ['xlsx', 'file extension for download', 'string'],
+        'exportAdditionalFileName' => [null, 'additional file name component, will be set automatically, if null', 'string']
     );
 
     /**
@@ -111,12 +112,15 @@ class AbstractExcelView extends AbstractView
 
         $this->renderValuesIntoTemplate();
 
+        $additionalName = $this->getOption('exportAdditionalFileName') ?? ($this->controllerContext->getRequest()->getControllerName() . '-' . $this->controllerContext->getRequest()->getControllerActionName());
+        $downloadFilename = $this->pathSegment . '-' . $additionalName . '-' . $this->getFormatedDateNow() . '.' . $this->getOption('fileExtension');
+
         $response = $this->controllerContext->getResponse();
         $response->setContentType('application/ms-excel');
         $response->setComponentParameter(
             SetHeaderComponent::class,
             'Content-Disposition',
-            'attachment;filename="' . $this->pathSegment . $this->getFormatedDateNow() . '.' . $this->getOption('fileExtension') . '"'
+            'attachment;filename="' . $downloadFilename
         );
         $response->setComponentParameter(
             SetHeaderComponent::class,
@@ -160,10 +164,9 @@ class AbstractExcelView extends AbstractView
                 foreach ($row as $value) {
                     $cell = $activeSheet->getCell([$columnNumber, $rowNumber]);
                     if (\array_key_exists($columnNumber, $this->columnTypes)) {
-                        $cell->setDataType($this->columnTypes[$columnNumber]);
-                        $cell->setValue($value);
+                        $cell->setValueExplicit($value, $this->columnTypes[$columnNumber]);
                     } else {
-                        $cell->setValue($value);
+                        $cell->setValueExplicit($value, DataType::TYPE_STRING);
                     }
                     $columnNumber++;
                 }
